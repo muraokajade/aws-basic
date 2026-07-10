@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CDK → CloudFormation 対応マップ | OcrAppStack</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'SF Mono', 'Fira Code', monospace; background: #1e1e2e; color: #cdd6f4; padding: 20px; }
+h1 { text-align: center; margin-bottom: 8px; color: #89b4fa; font-size: 1.4rem; }
+.subtitle { text-align: center; color: #a6adc8; margin-bottom: 24px; font-size: 0.85rem; }
+</style>
+</head>
+<body>
+<h1>CDK Code ↔ CloudFormation Template 対応マップ</h1>
+<p class="subtitle">OcrAppStack — lib/ocr-app-stack.ts → cdk.out/OcrAppStack.template.json</p>
+<style>
+.legend { display: flex; justify-content: center; gap: 24px; margin-bottom: 20px; flex-wrap: wrap; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; }
+.legend-color { width: 14px; height: 14px; border-radius: 3px; }
+.color-param { background: #f9e2af; }
+.color-resource { background: #a6e3a1; }
+.color-output { background: #89b4fa; }
+.color-meta { background: #9399b2; }
+.container { display: flex; gap: 16px; align-items: stretch; }
+.panel { flex: 1; background: #313244; border-radius: 8px; padding: 16px; overflow-x: auto; }
+.panel-header { font-weight: bold; font-size: 0.9rem; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #45475a; }
+.panel-header.cdk { color: #f38ba8; }
+.panel-header.cfn { color: #fab387; }
+</style>
+<style>
+.section { margin-bottom: 24px; }
+.section-title { font-size: 1rem; font-weight: bold; color: #cba6f7; margin: 24px 0 12px 0; padding: 6px 12px; background: #45475a; border-radius: 4px; display: inline-block; }
+.mapping-row { display: flex; gap: 16px; margin-bottom: 16px; align-items: stretch; }
+.mapping-row .panel { flex: 1; }
+.arrow { display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #f9e2af; min-width: 40px; }
+pre { font-size: 0.78rem; line-height: 1.6; white-space: pre-wrap; word-break: break-all; }
+.highlight-param { background: rgba(249,226,175,0.15); border-left: 3px solid #f9e2af; padding: 8px; border-radius: 4px; }
+.highlight-resource { background: rgba(166,227,161,0.15); border-left: 3px solid #a6e3a1; padding: 8px; border-radius: 4px; }
+.highlight-output { background: rgba(137,180,250,0.15); border-left: 3px solid #89b4fa; padding: 8px; border-radius: 4px; }
+.highlight-meta { background: rgba(147,153,178,0.15); border-left: 3px solid #9399b2; padding: 8px; border-radius: 4px; }
+.comment { color: #6c7086; font-style: italic; }
+.note { font-size: 0.75rem; color: #a6adc8; margin-top: 4px; padding-left: 12px; }
+</style>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-color color-param"></div>Parameters</div>
+  <div class="legend-item"><div class="legend-color color-resource"></div>Resources</div>
+  <div class="legend-item"><div class="legend-color color-output"></div>Outputs</div>
+  <div class="legend-item"><div class="legend-color color-meta"></div>CDK自動生成 (メタデータ等)</div>
+</div>
+
+<!-- ===== Parameters Section ===== -->
+<div class="section-title">📦 Parameters (パラメータ)</div>
+
+<div class="mapping-row">
+  <div class="panel">
+    <div class="panel-header cdk">CDK (TypeScript)</div>
+    <div class="highlight-param">
+<pre>const containerImage = new cdk.CfnParameter(
+  this, <span style="color:#f9e2af">'ContainerImage'</span>, {
+    type: 'String',
+    default: 'nginx:latest',
+    description: 'Lightsail Container Serviceで実行するDocker Image',
+  }
+);</pre>
+    </div>
+  </div>
+  <div class="arrow">→</div>
+  <div class="panel">
+    <div class="panel-header cfn">CloudFormation (JSON)</div>
+    <div class="highlight-param">
+<pre>"Parameters": {
+  "<span style="color:#f9e2af">ContainerImage</span>": {
+    "Type": "String",
+    "Default": "nginx:latest",
+    "Description": "Lightsail Container Serviceで実行するDocker Image"
+  }
+}</pre>
+    </div>
+  </div>
+</div>
+
+<div class="mapping-row">
+  <div class="panel">
+    <div class="panel-header cdk">CDK (TypeScript)</div>
+    <div class="highlight-param">
+<pre>const containerPort = new cdk.CfnParameter(
+  this, <span style="color:#f9e2af">'ContainerPort'</span>, {
+    type: 'Number',
+    default: 80,
+    description: 'Container内部でアプリが待ち受けるport'
+  }
+);</pre>
+    </div>
+  </div>
+  <div class="arrow">→</div>
+  <div class="panel">
+    <div class="panel-header cfn">CloudFormation (JSON)</div>
+    <div class="highlight-param">
+<pre>"<span style="color:#f9e2af">ContainerPort</span>": {
+  "Type": "Number",
+  "Default": 80,
+  "Description": "Container内部でアプリが待ち受けるport"
+}</pre>
+    </div>
+  </div>
+</div>
+
+<div class="mapping-row">
+  <div class="panel">
+    <div class="panel-header cdk">CDK (TypeScript)</div>
+    <div class="highlight-param">
+<pre>const healthCheckPath = new cdk.CfnParameter(
+  this, <span style="color:#f9e2af">'HealthCheckPath'</span>, {
+    type: 'String',
+    default: '/',
+    description: 'ヘルスチェック'
+  }
+);</pre>
+    </div>
+  </div>
+  <div class="arrow">→</div>
+  <div class="panel">
+    <div class="panel-header cfn">CloudFormation (JSON)</div>
+    <div class="highlight-param">
+<pre>"<span style="color:#f9e2af">HealthCheckPath</span>": {
+  "Type": "String",
+  "Default": "/",
+  "Description": "ヘルスチェック"
+}</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Resources Section ===== -->
+<div class="section-title">🏗️ Resources (リソース)</div>
+
+<div class="mapping-row">
+  <div class="panel">
+    <div class="panel-header cdk">CDK (TypeScript)</div>
+    <div class="highlight-resource">
+<pre>const containerService = new lightsail.<span style="color:#a6e3a1">CfnContainer</span>(
+  this, '<span style="color:#a6e3a1">OcrDemoContainerService</span>', {
+    serviceName: 'ocr-demo-container-service',
+    power: 'nano',
+    scale: 1,
+    containerServiceDeployment: {
+      containers: [{
+        containerName: 'ocr-api',
+        image: containerImage.valueAsString,
+        environment: [{
+          variable: 'OPENAI_VISION_MODEL',
+          value: 'gpt-4.1-mini'
+        }],
+        ports: [{
+          port: containerPort.valueAsString,
+          protocol: 'HTTP',
+        }],
+      }],
+      publicEndpoint: {
+        containerName: 'ocr-api',
+        containerPort: containerPort.valueAsNumber,
+        healthCheckConfig: {
+          path: healthCheckPath.valueAsString,
+          intervalSeconds: 10,
+          timeoutSeconds: 2,
+          healthyThreshold: 2,
+          unhealthyThreshold: 2,
+          successCodes: '200-399',
+        }
+      }
+    }
+  }
+);</pre>
+    </div>
+    <p class="note">💡 <code>containerImage.valueAsString</code> → CFnでは <code>{"Ref": "ContainerImage"}</code> に変換される</p>
+    <p class="note">💡 <code>containerPort.valueAsNumber</code> → CFnでは <code>{"Ref": "ContainerPort"}</code> に変換される</p>
+  </div>
+  <div class="arrow">→</div>
+  <div class="panel">
+    <div class="panel-header cfn">CloudFormation (JSON)</div>
+    <div class="highlight-resource">
+<pre>"<span style="color:#a6e3a1">OcrDemoContainerService</span>": {
+  "Type": "<span style="color:#a6e3a1">AWS::Lightsail::Container</span>",
+  "Properties": {
+    "ServiceName": "ocr-demo-container-service",
+    "Power": "nano",
+    "Scale": 1,
+    "ContainerServiceDeployment": {
+      "Containers": [{
+        "ContainerName": "ocr-api",
+        "Image": { "Ref": "ContainerImage" },
+        "Environment": [{
+          "Variable": "OPENAI_VISION_MODEL",
+          "Value": "gpt-4.1-mini"
+        }],
+        "Ports": [{
+          "Port": { "Ref": "ContainerPort" },
+          "Protocol": "HTTP"
+        }]
+      }],
+      "PublicEndpoint": {
+        "ContainerName": "ocr-api",
+        "ContainerPort": { "Ref": "ContainerPort" },
+        "HealthCheckConfig": {
+          "Path": { "Ref": "HealthCheckPath" },
+          "IntervalSeconds": 10,
+          "TimeoutSeconds": 2,
+          "HealthyThreshold": 2,
+          "UnhealthyThreshold": 2,
+          "SuccessCodes": "200-399"
+        }
+      }
+    }
+  }
+}</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Outputs Section ===== -->
+<div class="section-title">📤 Outputs (出力)</div>
+
+<div class="mapping-row">
+  <div class="panel">
+    <div class="panel-header cdk">CDK (TypeScript)</div>
+    <div class="highlight-output">
+<pre>new cdk.<span style="color:#89b4fa">CfnOutput</span>(this, '<span style="color:#89b4fa">ContainerServiceName</span>', {
+  description: 'Container Serviceの公開URL',
+  value: containerService.serviceName,
+});
+
+new cdk.<span style="color:#89b4fa">CfnOutput</span>(this, '<span style="color:#89b4fa">ContainerServiceUrl</span>', {
+  description: 'Coontainer Serviceの公開Url',
+  value: containerService.attrUrl,
+});</pre>
+    </div>
+    <p class="note">💡 <code>containerService.serviceName</code> → 静的文字列としてインライン展開</p>
+    <p class="note">💡 <code>containerService.attrUrl</code> → <code>Fn::GetAtt</code> に変換される</p>
+  </div>
+  <div class="arrow">→</div>
+  <div class="panel">
+    <div class="panel-header cfn">CloudFormation (JSON)</div>
+    <div class="highlight-output">
+<pre>"Outputs": {
+  "<span style="color:#89b4fa">ContainerServiceName</span>": {
+    "Description": "Container Serviceの公開URL",
+    "Value": "ocr-demo-container-service"
+  },
+  "<span style="color:#89b4fa">ContainerServiceUrl</span>": {
+    "Description": "Coontainer Serviceの公開Url",
+    "Value": {
+      "Fn::GetAtt": [
+        "OcrDemoContainerService", "Url"
+      ]
+    }
+  }
+}</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Auto-generated Section ===== -->
+<div class="section-title">🤖 CDK自動生成セクション</div>
+
+<div class="mapping-row">
+  <div class="panel">
+    <div class="panel-header cdk">CDK (TypeScript)</div>
+    <div class="highlight-meta">
+<pre><span class="comment">// CDKコードに記述なし
+// 以下はCDKが自動的に生成する</span></pre>
+    </div>
+    <p class="note">CDKフレームワークが暗黙的に追加するセクション</p>
+  </div>
+  <div class="arrow">→</div>
+  <div class="panel">
+    <div class="panel-header cfn">CloudFormation (JSON)</div>
+    <div class="highlight-meta">
+<pre><span class="comment">// BootstrapVersion パラメータ</span>
+"BootstrapVersion": {
+  "Type": "AWS::SSM::Parameter::Value&lt;String&gt;",
+  "Default": "/cdk-bootstrap/hnb659fds/version"
+}
+
+<span class="comment">// CDKMetadata リソース</span>
+"CDKMetadata": {
+  "Type": "AWS::CDK::Metadata",
+  "Condition": "CDKMetadataAvailable"
+}
+
+<span class="comment">// Conditions (リージョン判定)</span>
+"CDKMetadataAvailable": { "Fn::Or": [...] }
+
+<span class="comment">// Rules (Bootstrap version check)</span>
+"CheckBootstrapVersion": { ... }</pre>
+    </div>
+    <p class="note">⚙️ CDKのブートストラップ・メタデータ追跡用。ユーザーが書く必要なし。</p>
+  </div>
+</div>
+
+<!-- ===== Summary Table ===== -->
+<div class="section-title">📊 対応サマリーテーブル</div>
+
+<style>
+table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 0.8rem; }
+th { background: #45475a; color: #cdd6f4; padding: 10px; text-align: left; }
+td { padding: 10px; border-bottom: 1px solid #45475a; }
+tr:hover { background: #45475a33; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 0.7rem; font-weight: bold; }
+.badge-param { background: #f9e2af; color: #1e1e2e; }
+.badge-resource { background: #a6e3a1; color: #1e1e2e; }
+.badge-output { background: #89b4fa; color: #1e1e2e; }
+.badge-auto { background: #9399b2; color: #1e1e2e; }
+</style>
+
+<table>
+<thead>
+<tr>
+  <th>種別</th>
+  <th>CDK コンストラクト / メソッド</th>
+  <th>CDK論理ID</th>
+  <th>CFn セクション</th>
+  <th>CFn Type / Key</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><span class="badge badge-param">Param</span></td>
+  <td><code>cdk.CfnParameter</code></td>
+  <td>ContainerImage</td>
+  <td>Parameters</td>
+  <td>String</td>
+</tr>
+<tr>
+  <td><span class="badge badge-param">Param</span></td>
+  <td><code>cdk.CfnParameter</code></td>
+  <td>ContainerPort</td>
+  <td>Parameters</td>
+  <td>Number</td>
+</tr>
+<tr>
+  <td><span class="badge badge-param">Param</span></td>
+  <td><code>cdk.CfnParameter</code></td>
+  <td>HealthCheckPath</td>
+  <td>Parameters</td>
+  <td>String</td>
+</tr>
+<tr>
+  <td><span class="badge badge-resource">Resource</span></td>
+  <td><code>lightsail.CfnContainer</code></td>
+  <td>OcrDemoContainerService</td>
+  <td>Resources</td>
+  <td>AWS::Lightsail::Container</td>
+</tr>
+<tr>
+  <td><span class="badge badge-output">Output</span></td>
+  <td><code>cdk.CfnOutput</code></td>
+  <td>ContainerServiceName</td>
+  <td>Outputs</td>
+  <td>—</td>
+</tr>
+<tr>
+  <td><span class="badge badge-output">Output</span></td>
+  <td><code>cdk.CfnOutput</code></td>
+  <td>ContainerServiceUrl</td>
+  <td>Outputs</td>
+  <td>Fn::GetAtt</td>
+</tr>
+<tr>
+  <td><span class="badge badge-auto">Auto</span></td>
+  <td><em>CDK自動生成</em></td>
+  <td>BootstrapVersion</td>
+  <td>Parameters</td>
+  <td>AWS::SSM::Parameter::Value</td>
+</tr>
+<tr>
+  <td><span class="badge badge-auto">Auto</span></td>
+  <td><em>CDK自動生成</em></td>
+  <td>CDKMetadata</td>
+  <td>Resources</td>
+  <td>AWS::CDK::Metadata</td>
+</tr>
+<tr>
+  <td><span class="badge badge-auto">Auto</span></td>
+  <td><em>CDK自動生成</em></td>
+  <td>CDKMetadataAvailable</td>
+  <td>Conditions</td>
+  <td>Fn::Or</td>
+</tr>
+<tr>
+  <td><span class="badge badge-auto">Auto</span></td>
+  <td><em>CDK自動生成</em></td>
+  <td>CheckBootstrapVersion</td>
+  <td>Rules</td>
+  <td>Assertion</td>
+</tr>
+</tbody>
+</table>
+
+<!-- ===== Key Transformations ===== -->
+<div class="section-title">🔑 CDK → CFn 変換ルールまとめ</div>
+
+<style>
+.rules-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+.rule-card { background: #313244; border-radius: 6px; padding: 12px; border-left: 3px solid #cba6f7; }
+.rule-card h4 { color: #cba6f7; font-size: 0.85rem; margin-bottom: 6px; }
+.rule-card p { font-size: 0.75rem; color: #bac2de; line-height: 1.5; }
+.rule-card code { background: #45475a; padding: 1px 4px; border-radius: 2px; font-size: 0.72rem; }
+</style>
+
+<div class="rules-grid">
+  <div class="rule-card">
+    <h4>1. 論理IDの決定</h4>
+    <p>CDKコンストラクタの第2引数がCloudFormationの論理IDになる。<br>
+    <code>new CfnContainer(this, 'OcrDemoContainerService', ...)</code><br>
+    → 論理ID: <code>OcrDemoContainerService</code></p>
+  </div>
+  <div class="rule-card">
+    <h4>2. Parameter参照 → Ref</h4>
+    <p><code>param.valueAsString</code> / <code>param.valueAsNumber</code><br>
+    → <code>{"Ref": "パラメータ名"}</code> に変換</p>
+  </div>
+  <div class="rule-card">
+    <h4>3. 属性アクセス → GetAtt</h4>
+    <p><code>resource.attrXxx</code><br>
+    → <code>{"Fn::GetAtt": ["論理ID", "Xxx"]}</code> に変換</p>
+  </div>
+  <div class="rule-card">
+    <h4>4. プロパティ名のケース変換</h4>
+    <p>CDK (camelCase) → CFn (PascalCase)<br>
+    <code>serviceName</code> → <code>ServiceName</code><br>
+    <code>containerServiceDeployment</code> → <code>ContainerServiceDeployment</code></p>
+  </div>
+  <div class="rule-card">
+    <h4>5. 静的値のインライン展開</h4>
+    <p>CDKで固定文字列を設定した場合はそのまま埋め込まれる<br>
+    <code>serviceName: 'ocr-demo-...'</code> → <code>"ServiceName": "ocr-demo-..."</code></p>
+  </div>
+  <div class="rule-card">
+    <h4>6. メタデータ自動追加</h4>
+    <p>CDKはブートストラップ情報・メタデータ・Conditionsを自動で付与。<br>
+    開発者が明示的に書く必要はない。</p>
+  </div>
+</div>
+
+<br><br>
+<p style="text-align:center; color:#6c7086; font-size:0.7rem;">Generated from: lib/ocr-app-stack.ts ↔ cdk.out/OcrAppStack.template.json</p>
+</body>
+</html>

@@ -6,35 +6,7 @@ import * as lightsail from 'aws-cdk-lib/aws-lightsail';
 export class OcrAppStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
-    //このStackをCDKの仕組みの中に登録します
-    // new lightsail.CfnInstance(...) オブジェクト、AWS上の本物のInstanceではない
-    //     ↓
-    // CDKコード上に
-    // Lightsail Instanceの設計情報を追加　比較対象
-    new lightsail.CfnInstance(this, 'OcrDemoInstance', {
-      instanceName: 'ocr-demo-instance',
-      availabilityZone: 'ap-northeast-1a',
-      blueprintId: 'ubuntu_22_04',
-      bundleId: 'nano_3_0',
 
-      // Instanceへ外部から接続するためのport設定
-      networking: {
-        ports: [
-          {
-            // SSH接続用
-            fromPort: 22,
-            toPort: 22,
-            protocol: 'tcp',
-          },
-          {
-            // HTTP 公開用
-            fromPort: 80,
-            toPort: 80,
-            protocol: 'tcp',
-          }
-        ]
-      }
-    });
     // ============================
     // デプロイするDocker image
     // ============================
@@ -131,7 +103,7 @@ export class OcrAppStack extends cdk.Stack {
           containerPort: containerPort.valueAsNumber,
 
           healthCheckConfig: {
-            path: '/',
+            path: healthCheckPath.valueAsString,
             intervalSeconds: 10,
             timeoutSeconds: 2,
             healthyThreshold: 2,
@@ -143,7 +115,7 @@ export class OcrAppStack extends cdk.Stack {
     });
 
     // ============================
-    // CloudFormation実行後に表示する情報
+    // CloudFormationの実行結果として表示したい情報を登録する。
     // ============================
     new cdk.CfnOutput(this, 'ContainerServiceName', {
       description: 'Container Serviceの公開URL',
