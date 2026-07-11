@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>OCRデモ</title>
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css"
+        rel="stylesheet"
+    >
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', path='css/ocr_demo.css') }}"
+    >
+</head>
+
+<body>
+<div class="ocr-demo-page">
+
+    {# CSRF不要（FastAPI） #}
+
+    <main class="ocr-demo-container">
+
+        {# ============================== #}
+        {# Header #}
+        {# ============================== #}
+        <header class="demo-header">
+            <div>
+                <p class="demo-eyebrow">OCR DEMO</p>
+                <h1 class="demo-title">物件資料をアップロード</h1>
+                <p class="demo-description">
+                    画像をアップロードすると、OCRで読み取った情報を下のフォームへ反映します。
+                </p>
+            </div>
+
+            <span class="demo-badge">Demo</span>
+        </header>
+
+
+        {# ============================== #}
+        {# Upload #}
+        {# ============================== #}
+        <section class="demo-panel upload-panel">
+            <div class="panel-heading">
+                <div>
+                    <h2 class="panel-title">ファイルアップロード</h2>
+                    <p class="panel-subtitle">JPEG / PNG・最大3枚</p>
+                </div>
+            </div>
+
+            <div
+                id="dropZone"
+                class="drop-zone"
+                role="button"
+                tabindex="0"
+                aria-label="画像ファイルをアップロード"
+            >
+                <div class="drop-zone-icon">
+                    <i class="bi bi-cloud-arrow-up"></i>
+                </div>
+
+                <p class="drop-zone-title">
+                    ファイルをドロップしてください
+                </p>
+
+                <p class="drop-zone-or">
+                    または
+                </p>
+
+                <label
+                    for="imageInput"
+                    class="btn btn-primary file-select-btn"
+                >
+                    ファイル選択
+                </label>
+
+                <input
+                    type="file"
+                    id="imageInput"
+                    accept="image/jpeg,image/png"
+                    multiple
+                    hidden
+                >
+            </div>
+
+            {# 選択済みファイル #}
+            <div
+                id="fileList"
+                class="selected-files"
+                style="display:none;"
+            >
+                <p class="selected-files-title">
+                    選択中のファイル
+                </p>
+
+                <ul
+                    id="fileListItems"
+                    class="list-group list-group-flush"
+                ></ul>
+            </div>
+
+            {# Action #}
+            <div class="upload-actions">
+                <button
+                    id="ocrBtn"
+                    type="button"
+                    class="btn btn-primary ocr-run-btn"
+                    disabled
+                >
+                    <i class="bi bi-cpu"></i>
+                    OCRを実行
+                </button>
+
+                <button
+                    id="resetBtn"
+                    type="button"
+                    class="btn btn-outline-secondary reset-btn"
+                >
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                    リセット
+                </button>
+            </div>
+
+            {# Status #}
+            <div
+                id="statusArea"
+                class="status-area"
+                style="display:none;"
+            ></div>
+        </section>
+
+
+        {# ============================== #}
+        {# Result Form #}
+        {# ============================== #}
+        <section
+            class="demo-panel result-panel"
+            id="resultCard"
+        >
+            <div class="result-header">
+                <div>
+                    <p class="demo-eyebrow mb-1">RESULT PREVIEW</p>
+                    <h2 class="result-title">読み取り結果</h2>
+                </div>
+
+                <button
+                    id="toggleRawBtn"
+                    type="button"
+                    class="btn btn-sm btn-outline-secondary"
+                >
+                    JSON表示
+                </button>
+            </div>
+
+
+            <div id="resultForm">
+
+                {# ============================== #}
+                {# 物件概要 #}
+                {# ============================== #}
+                <section class="result-section">
+                    <h3 class="result-section-title">
+                        物件概要
+                    </h3>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="property_name">
+                                物件名
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="property_name"
+                                name="property_name"
+                            >
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="info_date">
+                                情報入手日
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="info_date"
+                                name="info_date"
+                            >
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="info_source">
+                                情報入手先
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="info_source"
+                                name="info_source"
+                            >
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="info_source_contact">
+                                情報入手先担当者
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="info_source_contact"
+                                name="info_source_contact"
+                            >
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="price">
+                                価格（円）
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="price"
+                                name="price"
+                            >
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label" for="address_display">
+                                所在（住居表示）
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="address_display"
+                                name="address_display"
+                            >
+                        </div>
+
+                    </div>
+                </section>
+
+
+                {# ============================== #}
+                {# 基本情報 #}
+                {# ============================== #}
+                <section class="result-section">
+                    <h3 class="result-section-title">
+                        基本情報
+                    </h3>
+
+                    <div class="row g-3">
+
+                        <div class="col-12">
+                            <label class="form-label" for="address_lot">
+                                所在（地番）
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="address_lot"
+                                name="address_lot"
+                            >
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="current_status_land">
+                                現況
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="current_status_land"
+                                name="current_status_land"
+                            >
+                        </div>
+
+                    </div>
+                </section>
+
+
+                {# ============================== #}
+                {# 交通情報 #}
+                {# ============================== #}
+                <section class="result-section">
+                    <h3 class="result-section-title">
+                        交通情報
+                    </h3>
+
+                    <div class="subsection-label">
+                        交通1
+                    </div>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-4">
+                            <label class="form-label" for="transport_line_1">
+                                路線
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="transport_line_1"
+                                name="transport_line_1"
+                            >
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label" for="transport_station_1">
+                                駅名
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="transport_station_1"
+                                name="transport_station_1"
+                            >
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label" for="transport_minutes_1">
+                                徒歩（分）
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="transport_minutes_1"
+                                name="transport_minutes_1"
+                            >
+                        </div>
+
+                    </div>
+
+                    <div class="subsection-label mt-4">
+                        交通2
+                    </div>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-4">
+                            <label class="form-label" for="transport_line_2">
+                                路線
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="transport_line_2"
+                                name="transport_line_2"
+                            >
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label" for="transport_station_2">
+                                駅名
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="transport_station_2"
+                                name="transport_station_2"
+                            >
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label" for="transport_minutes_2">
+                                徒歩（分）
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="transport_minutes_2"
+                                name="transport_minutes_2"
+                            >
+                        </div>
+
+                    </div>
+                </section>
+
+
+                {# ============================== #}
+                {# 土地情報 #}
+                {# ============================== #}
+                <section class="result-section">
+                    <h3 class="result-section-title">
+                        土地情報
+                    </h3>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="land_area_official">
+                                地積（公簿）（㎡）
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="land_area_official"
+                                name="land_area_official"
+                            >
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="land_area_measured">
+                                地積（実測）（㎡）
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="land_area_measured"
+                                name="land_area_measured"
+                            >
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="effective_land_area_official">
+                                有効地積（公簿）（㎡）
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="effective_land_area_official"
+                                name="effective_land_area_official"
+                            >
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="effective_land_area_measured">
+                                有効地積（実測）（㎡）
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="effective_land_area_measured"
+                                name="effective_land_area_measured"
+                            >
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="land_category_1">
+                                地目1
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="land_category_1"
+                                name="land_category_1"
+                            >
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="land_category_2">
+                                地目2
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="land_category_2"
+                                name="land_category_2"
+                            >
+                        </div>
+
+                    </div>
+                </section>
+
+
+                {# ============================== #}
+                {# 道路情報 #}
+                {# ============================== #}
+                <section class="result-section">
+                    <h3 class="result-section-title">
+                        道路情報
+                    </h3>
+
+                    <div class="subsection-label">
+                        道路1
+                    </div>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="road_direction_1">
+                                方向
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="road_direction_1"
+                                name="road_direction_1"
+                            >
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="road_width_1">
+                                幅員（m）
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="road_width_1"
+                                name="road_width_1"
+                            >
+                        </div>
+
+                    </div>
+
+                    <div class="subsection-label mt-4">
+                        道路2
+                    </div>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="road_direction_2">
+                                方向
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="road_direction_2"
+                                name="road_direction_2"
+                            >
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="road_width_2">
+                                幅員（m）
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="road_width_2"
+                                name="road_width_2"
+                            >
+                        </div>
+
+                    </div>
+                </section>
+
+
+                {# ============================== #}
+                {# 用途地域・建築規制 #}
+                {# ============================== #}
+                <section class="result-section">
+                    <h3 class="result-section-title">
+                        用途地域・建築規制
+                    </h3>
+
+                    <div class="subsection-label">
+                        エリア1
+                    </div>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="use_district_1">
+                                用途地域
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="use_district_1"
+                                name="use_district_1"
+                            >
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="building_coverage_ratio_1">
+                                建ぺい率
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="building_coverage_ratio_1"
+                                name="building_coverage_ratio_1"
+                            >
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="floor_area_ratio_1">
+                                容積率
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="floor_area_ratio_1"
+                                name="floor_area_ratio_1"
+                            >
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="height_district_1">
+                                高度指定
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="height_district_1"
+                                name="height_district_1"
+                            >
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="fire_district_1">
+                                防火指定
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="fire_district_1"
+                                name="fire_district_1"
+                            >
+                        </div>
+
+                    </div>
+                </section>
+
+
+                {# ============================== #}
+                {# 建物情報 #}
+                {# ============================== #}
+                <section class="result-section">
+                    <h3 class="result-section-title">
+                        建物情報
+                    </h3>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="building_type_1">
+                                建物種類1
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="building_type_1"
+                                name="building_type_1"
+                            >
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="construction_date">
+                                築年月
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="construction_date"
+                                name="construction_date"
+                            >
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="building_structure">
+                                構造
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="building_structure"
+                                name="building_structure"
+                            >
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="building_area">
+                                延べ床面積（㎡）
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="building_area"
+                                name="building_area"
+                            >
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="inspection_certificate">
+                                検査済証
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="inspection_certificate"
+                                name="inspection_certificate"
+                            >
+                        </div>
+
+                    </div>
+                </section>
+
+
+                {# ============================== #}
+                {# 財務情報 #}
+                {# ============================== #}
+                <section class="result-section">
+                    <h3 class="result-section-title">
+                        財務情報
+                    </h3>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="road_price">
+                                路線価（円/㎡）
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="road_price"
+                                name="road_price"
+                            >
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="management_fee">
+                                管理費
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="management_fee"
+                                name="management_fee"
+                            >
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="repair_reserve_fund">
+                                修繕積立金
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="repair_reserve_fund"
+                                name="repair_reserve_fund"
+                            >
+                        </div>
+
+                    </div>
+                </section>
+
+
+                {# ============================== #}
+                {# その他 #}
+                {# ============================== #}
+                <section class="result-section">
+                    <h3 class="result-section-title">
+                        その他情報
+                    </h3>
+
+                    <div class="row g-3">
+
+                        <div class="col-12">
+                            <label class="form-label" for="remarks">
+                                備考
+                            </label>
+                            <textarea
+                                class="form-control"
+                                id="remarks"
+                                name="remarks"
+                                rows="3"
+                            ></textarea>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label" for="extraction_notes">
+                                読み取りメモ
+                            </label>
+                            <textarea
+                                class="form-control extraction-notes"
+                                id="extraction_notes"
+                                name="extraction_notes"
+                                rows="3"
+                                readonly
+                            ></textarea>
+                        </div>
+
+                    </div>
+                </section>
+
+            </div>
+
+
+            {# JSON debug #}
+            <pre
+                id="resultJson"
+                class="json-result"
+                style="display:none;"
+            ></pre>
+
+        </section>
+
+    </main>
+</div>
+
+<script src="{{ url_for('static', path='js/ocr_demo.js') }}"></script>
+</body>
+</html>

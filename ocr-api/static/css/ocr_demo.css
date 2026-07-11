@@ -1,0 +1,439 @@
+/* ========================================
+   OCR Demo
+======================================== */
+
+:root {
+    --demo-bg: #f4f7fb;
+    --demo-panel: #ffffff;
+    --demo-border: #dbe3ee;
+    --demo-border-soft: #e8edf4;
+    --demo-text: #102033;
+    --demo-muted: #64748b;
+    --demo-primary: #3b82f6;
+    --demo-primary-dark: #2563eb;
+    --demo-primary-soft: #eff6ff;
+    --demo-success-soft: #ecfdf5;
+    --demo-success-border: #a7f3d0;
+    --demo-section-bg: #f8fafc;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--demo-bg);
+    color: var(--demo-text);
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        "Noto Sans JP",
+        sans-serif;
+}
+
+.ocr-demo-page {
+    min-height: 100vh;
+    padding: 32px 20px 64px;
+}
+
+.ocr-demo-container {
+    width: min(1120px, 100%);
+    margin: 0 auto;
+}
+
+
+/* ========================================
+   Header
+======================================== */
+
+.demo-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.demo-eyebrow {
+    margin: 0 0 5px;
+    color: var(--demo-primary);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+}
+
+.demo-title {
+    margin: 0;
+    font-size: clamp(1.65rem, 3vw, 2.35rem);
+    font-weight: 750;
+    letter-spacing: -0.03em;
+}
+
+.demo-description {
+    margin: 8px 0 0;
+    color: var(--demo-muted);
+    font-size: 0.9rem;
+}
+
+.demo-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 54px;
+    height: 28px;
+    padding: 0 12px;
+    border: 1px solid #bfdbfe;
+    border-radius: 999px;
+    background: var(--demo-primary-soft);
+    color: var(--demo-primary-dark);
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+
+/* ========================================
+   Panel
+======================================== */
+
+.demo-panel {
+    margin-bottom: 24px;
+    overflow: hidden;
+    border: 1px solid var(--demo-border);
+    border-radius: 16px;
+    background: var(--demo-panel);
+    box-shadow:
+        0 10px 30px rgba(15, 23, 42, 0.05);
+}
+
+.upload-panel {
+    padding: 22px;
+}
+
+.panel-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--demo-border-soft);
+}
+
+.panel-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 750;
+}
+
+.panel-subtitle {
+    margin: 4px 0 0;
+    color: var(--demo-muted);
+    font-size: 0.72rem;
+}
+
+
+/* ========================================
+   Drop Zone
+======================================== */
+
+.drop-zone {
+    min-height: 270px;
+    padding: 48px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    border: 2px dashed #bfd0e5;
+    border-radius: 14px;
+    background: #fbfdff;
+
+    cursor: pointer;
+
+    transition:
+        border-color 0.2s ease,
+        background-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.drop-zone:hover,
+.drop-zone:focus-visible {
+    border-color: var(--demo-primary);
+    background: var(--demo-primary-soft);
+    outline: none;
+}
+
+.drop-zone.dragover {
+    border-color: var(--demo-primary);
+    background: var(--demo-primary-soft);
+    transform: scale(1.005);
+}
+
+.drop-zone-icon {
+    width: 60px;
+    height: 60px;
+    display: grid;
+    place-items: center;
+
+    margin-bottom: 16px;
+
+    border-radius: 50%;
+    background: var(--demo-primary-soft);
+    color: var(--demo-primary);
+
+    font-size: 2rem;
+}
+
+.drop-zone-title {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 750;
+}
+
+.drop-zone-or {
+    margin: 7px 0;
+    color: var(--demo-muted);
+    font-size: 0.75rem;
+}
+
+.file-select-btn {
+    min-width: 126px;
+    font-size: 0.82rem;
+}
+
+
+/* ========================================
+   Selected Files
+======================================== */
+
+.selected-files {
+    margin-top: 18px;
+    padding: 16px;
+    border: 1px solid var(--demo-border-soft);
+    border-radius: 12px;
+    background: var(--demo-section-bg);
+}
+
+.selected-files-title {
+    margin: 0 0 8px;
+    font-size: 0.82rem;
+    font-weight: 750;
+}
+
+.selected-files .list-group-item {
+    padding-left: 0;
+    padding-right: 0;
+    background: transparent;
+    font-size: 0.82rem;
+}
+
+
+/* ========================================
+   Actions
+======================================== */
+
+.upload-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.ocr-run-btn {
+    flex: 1;
+    min-height: 44px;
+    font-weight: 750;
+}
+
+.reset-btn {
+    min-height: 44px;
+}
+
+.status-area {
+    margin-top: 16px;
+}
+
+.status-area.alert {
+    margin-bottom: 0;
+    font-size: 0.84rem;
+}
+
+
+/* ========================================
+   Result Header
+======================================== */
+
+.result-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+
+    padding: 20px 22px;
+
+    border-bottom: 1px solid var(--demo-border-soft);
+}
+
+.result-title {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 780;
+}
+
+
+/* ========================================
+   Result Sections
+======================================== */
+
+#resultForm {
+    padding: 22px;
+}
+
+.result-section {
+    padding: 20px;
+    margin-bottom: 18px;
+
+    border: 1px solid var(--demo-border-soft);
+    border-radius: 12px;
+
+    background: var(--demo-section-bg);
+}
+
+.result-section:last-child {
+    margin-bottom: 0;
+}
+
+.result-section-title {
+    margin: 0 0 18px;
+
+    color: var(--demo-text);
+
+    font-size: 0.9rem;
+    font-weight: 780;
+}
+
+.subsection-label {
+    margin-bottom: 12px;
+
+    color: var(--demo-primary-dark);
+
+    font-size: 0.78rem;
+    font-weight: 750;
+}
+
+
+/* ========================================
+   Forms
+======================================== */
+
+#resultForm .form-label {
+    margin-bottom: 6px;
+
+    color: #475569;
+
+    font-size: 0.76rem;
+    font-weight: 650;
+}
+
+#resultForm .form-control,
+#resultForm .form-select {
+    min-height: 42px;
+
+    border-color: #cfd9e6;
+    border-radius: 7px;
+
+    background: #ffffff;
+    color: var(--demo-text);
+
+    font-size: 0.86rem;
+
+    transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+#resultForm .form-control:focus,
+#resultForm .form-select:focus {
+    border-color: var(--demo-primary);
+
+    box-shadow:
+        0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+#resultForm textarea.form-control {
+    min-height: 92px;
+    resize: vertical;
+}
+
+#resultForm .extraction-notes {
+    background: var(--demo-success-soft);
+    border-color: var(--demo-success-border);
+}
+
+
+/* ========================================
+   JSON
+======================================== */
+
+.json-result {
+    max-height: 420px;
+    overflow: auto;
+
+    margin: 0 22px 22px;
+    padding: 18px;
+
+    border: 1px solid var(--demo-border-soft);
+    border-radius: 10px;
+
+    background: #0f172a;
+    color: #e2e8f0;
+
+    font-size: 0.78rem;
+    line-height: 1.6;
+}
+
+
+/* ========================================
+   Responsive
+======================================== */
+
+@media (max-width: 768px) {
+    .ocr-demo-page {
+        padding: 20px 12px 48px;
+    }
+
+    .demo-header {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .drop-zone {
+        min-height: 220px;
+        padding: 36px 16px;
+    }
+
+    .upload-actions {
+        flex-direction: column;
+    }
+
+    .ocr-run-btn,
+    .reset-btn {
+        width: 100%;
+    }
+
+    .result-header {
+        align-items: flex-start;
+    }
+
+    #resultForm {
+        padding: 14px;
+    }
+
+    .result-section {
+        padding: 16px;
+    }
+
+    .json-result {
+        margin: 0 14px 14px;
+    }
+}
