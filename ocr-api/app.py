@@ -16,16 +16,43 @@ except ImportError:
 from ocr_core.services import analyze_property_images
 
 
+# 1. UploadFile
+# 2. await img.read()
+# 3. bytes取得
+# 4. SyncImageFileへ保存
+# 5. _position = 0
+# 6. read()で現在位置から末尾まで返す
+# 7. read()後、_positionは末尾
+# 8. seek(0)で先頭へ戻す
+# 9. もう一度read()できる
+# 10. 実際のseek(0)利用箇所はrg "seek\(0\)" ocr_core
 # ============================
 # 同期アダプター
 # ============================
 
 class SyncImageFile:
     """
-    UploadFile(非同期)から読み込んだバイト列を、
-    ocr_core が要求する同期インターフェース(.name, .read(), .seek())で
-    提供するための軽量アダプター。
-    """
+        UploadFile(非同期)から読み込んだバイト列を、
+        ocr_core が要求する同期インターフェース(.name, .read(), .seek())で
+        提供するための軽量アダプター。
+
+        インターフェイス「Pythonでは多くの場合、
+        この属性とメソッドを持っていれば使えるというダックタイピングで扱います。」
+        既存OCRが要求しているもの→ file-like object(DjangoのUploadedFileと同じように操作できるファイル風オブジェクト)
+    
+            read()
+            → 全部読む
+            → positionは末尾
+
+            read()
+            → 空
+
+            seek(0)
+            → positionを先頭へ戻す
+
+            read()
+            → また全部読める
+        """
 
     def __init__(self, filename: str, data: bytes):
         self.name = filename
@@ -34,7 +61,7 @@ class SyncImageFile:
         self._position = 0
 
     def read(self) -> bytes:
-        result = self._data[self._position:]
+        result = self._data[self._position:] # self._data = b"ABCDE" だとすると、self._data[0:]で最後まで。
         self._position = len(self._data)
         return result
 

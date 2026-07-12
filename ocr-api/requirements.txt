@@ -4,3 +4,16 @@ fastapi
 uvicorn[standard]
 jinja2
 python-multipart
+
+
+# requirements.txt
+# → Container内Pythonへ必要ライブラリを入れる
+
+# app:app
+# → app.pyのapp変数を起動する
+
+# 0.0.0.0
+# → Container外から通信を受け付ける
+
+# 8000
+# → Container内部でFastAPIが待つPort

@@ -8,4 +8,5 @@ node_modules
 cdk.out
 
 .env
-.env.example
+.env.*
+!.env.example
