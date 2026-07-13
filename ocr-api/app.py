@@ -32,6 +32,18 @@ from ocr_core.services import analyze_property_images
 
 class SyncImageFile:
     """
+        SyncImageFileが作っているのは、特別な画像形式ではありません。
+        既存OCRが「ファイルとして扱える」と判断できる、最小限のファイル風オブジェクトです。
+
+        既存OCR
+        はこういう使い方だった。
+
+            image_file.name
+            image_file.size
+            image_file.read()
+            image_file.seek(0)
+
+
         UploadFile(非同期)から読み込んだバイト列を、
         ocr_core が要求する同期インターフェース(.name, .read(), .seek())で
         提供するための軽量アダプター。
@@ -52,6 +64,8 @@ class SyncImageFile:
 
             read()
             → また全部読める
+
+
         """
 
     def __init__(self, filename: str, data: bytes):
@@ -141,7 +155,9 @@ async def ocr(
         # 同期的な ocr_core に渡せるアダプターへ変換する
         adapted_files = []
         for img in images:
+            # 1. UploadFileから画像本体をbytesとして取り出す
             content = await img.read()
+            # 2. bytesを同期ファイル風オブジェクトへ包む
             adapted_files.append(
                 SyncImageFile(filename=img.filename, data=content)
             )
@@ -166,3 +182,16 @@ async def ocr(
                 "data": None,
             },
         )
+
+# for img in images:
+#     # 1. UploadFileから画像本体をbytesとして取り出す
+#     content = await img.read()
+
+#     # 2. bytesを同期ファイル風オブジェクトへ包む
+#     adapted_file = SyncImageFile(
+#         filename=img.filename,
+#         data=content,
+#     )
+
+#     # 3. OCRへ渡すためlistへ追加
+#     adapted_files.append(adapted_file)
