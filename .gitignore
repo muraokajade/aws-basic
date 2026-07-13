@@ -10,3 +10,10 @@ cdk.out
 .env
 .env.*
 !.env.example
+
+# FastAPI OCR demo frontend JavaScript
+!ocr-api/static/js/
+!ocr-api/static/js/**/*.js
+
+__pycache__/
+*.py[cod]
